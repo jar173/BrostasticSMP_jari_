@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "brostasticsmp",
+	"version": "${version}",
+	"name": "BrostasticSMP",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/brostasticsmp/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"jari_.brostasticsmp.BrostasticSMP"
+		],
+		"client": [
+			"jari_.brostasticsmp.BrostasticSMPClient"
+		],
+		"fabric-datagen": [
+			"jari_.brostasticsmp.BrostasticSMPDataGenerator"
+		]
+	},
+	"mixins": [
+		"brostasticsmp.mixins.json",
+		{
+			"config": "brostasticsmp.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
