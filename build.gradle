@@ -1,0 +1,89 @@
+plugins {
+	id 'fabric-loom' version '1.9-SNAPSHOT'  // Fabric Loom Version
+	id 'maven-publish'  // Maven Publishing Plugin
+	id 'java'  // Java Plugin für Gradle
+}
+
+version = project.hasProperty('mod_version') ? project.mod_version : '1.0.0'  // Fallback für Version falls keine Projektproperty gesetzt ist
+group = project.hasProperty('maven_group') ? project.maven_group : 'com.example'  // Fallback für Group
+
+base {
+	archivesName = project.hasProperty('archives_base_name') ? project.archives_base_name : 'modname'  // Fallback für den Archivnamen
+}
+
+repositories {
+	mavenCentral()  // Zentrale Maven Repository
+	maven { url 'https://maven.fabricmc.net/' }  // Fabric Maven Repository
+	maven { url 'https://repo.spongepowered.org/repository/maven-public/' }  // Sponge Maven Repository
+}
+
+loom {
+	splitEnvironmentSourceSets()  // Trennt die SourceSets für Client und Server
+
+	mods {
+		"brostasticsmp" {
+			sourceSet sourceSets.main  // Setzt den Mod für das Main-SourceSet
+			sourceSet sourceSets.client  // Setzt den Mod für das Client-SourceSet
+		}
+	}
+}
+
+fabricApi {
+	configureDataGeneration {
+		client = true  // Aktiviert die Daten-Generierung für den Client
+	}
+}
+
+dependencies {
+	// Abhängigkeiten für Minecraft und Fabric API
+	minecraft "com.mojang:minecraft:${project.hasProperty('minecraft_version') ? project.minecraft_version : '1.21.4'}"  // Sicherstellen, dass die Minecraft-Version gesetzt ist
+	mappings "net.fabricmc:yarn:${project.hasProperty('yarn_mappings') ? project.yarn_mappings : '1.21.4+build.1'}:v2"  // Sicherstellen, dass Yarn Mappings gesetzt sind
+
+	modImplementation "net.fabricmc:fabric-loader:${project.hasProperty('loader_version') ? project.loader_version : '0.14.0'}"  // Sicherstellen, dass Fabric Loader gesetzt ist
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.hasProperty('fabric_version') ? project.fabric_version : '0.115.1+1.21.4'}"  // Sicherstellen, dass Fabric API gesetzt ist
+
+	compileOnly "net.fabricmc:fabric-loom:${project.hasProperty('loom_version') ? project.loom_version : '0.11.3'}"  // Loom Version, mit Fallback
+}
+
+processResources {
+	inputs.property "version", project.version  // Version als Property setzen
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version  // Die Version in die `fabric.mod.json`-Datei einfügen
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21  // Stellt sicher, dass der Code mit JDK 21 kompiliert wird
+}
+
+java {
+	withSourcesJar()  // Quelle JAR wird automatisch angehängt
+
+	sourceCompatibility = JavaVersion.VERSION_21  // Sicherstellen, dass die Quellen mit JDK 21 kompatibel sind
+	targetCompatibility = JavaVersion.VERSION_21  // Zielversion auf JDK 21 setzen
+}
+
+jar {
+	from("LICENSE") {
+		rename { "${it}_${project.base.archivesName.get()}" }  // Lizenzdatei ins JAR einfügen und umbenennen
+	}
+}
+
+// Maven Publication Setup für die Veröffentlichung
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			artifactId = project.archivesBaseName  // Setzt den ArtifactId (in der Regel der Modname)
+			from components.java  // Das Java-Projekt als Artefakt definieren
+		}
+	}
+
+	repositories {
+		// Hier könntest du Repositories zum Veröffentlichen hinzufügen (z.B. für Nexus oder Maven Central)
+		// Beispiel:
+		// maven {
+		//     url = uri("https://repo.maven.apache.org/maven2")
+		// }
+	}
+}
